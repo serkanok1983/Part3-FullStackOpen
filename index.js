@@ -2,6 +2,17 @@ const express = require("express");
 const morgan = require("morgan");
 const cors = require("cors");
 const app = express();
+require("dotenv").config();
+
+const mongoose = require("mongoose");
+const url = process.env.MONGODB_URI;
+mongoose.set("strictQuery", false);
+mongoose.connect(url)
+const personSchema = new mongoose.Schema({
+  name: String,
+  number: String,
+});
+const Person = mongoose.model("Person", personSchema);
 
 app.use(express.static('dist'))
 app.use(express.json());
@@ -36,7 +47,9 @@ let persons = [
 ];
 
 app.get("/api/persons", (req, res) => {
-  res.json(persons);
+  Person.find({}).then((persons) => {
+    res.json(persons);
+  });
 });
 
 app.get("/api/persons/:id", (req, res) => {
