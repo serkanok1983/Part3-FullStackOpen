@@ -71,12 +71,12 @@ app.get("/api/persons/:id", (req, res, next) => {
     });
 });
 
-app.get("/info", (req, res) => {
-  const date = new Date();
-  res.send(
-    `<p>Phonebook has info for ${persons.length} people</p><p>${date}</p>`
-  );
-});
+// app.get("/info", (req, res) => {
+//   const date = new Date();
+//   res.send(
+//     `<p>Phonebook has info for ${persons.length} people</p><p>${date}</p>`
+//   );
+// });
 
 // app.delete("/api/persons/:id", (req, res) => {
 //   const id = req.params.id;
@@ -107,7 +107,7 @@ app.post("/api/persons", (req, res, next) => {
       Person.findByIdAndUpdate(
         existingPerson._id,
         { number: body.number },
-        { new: true, runValidators: true, context: 'query' }
+        { new: true, runValidators: true, context: "query" }
       )
         .then((updatedPerson) => {
           res.json(updatedPerson);
@@ -128,6 +128,7 @@ app.post("/api/persons", (req, res, next) => {
     }
   });
 });
+
 app.put("/api/persons/:id", (req, res, next) => {
   const body = req.body;
   const person = {
@@ -141,6 +142,12 @@ app.put("/api/persons/:id", (req, res, next) => {
     .catch((error) => next(error));
 });
 
+app.get("/info", (req, res) => {
+  Person.countDocuments({}).then((count) => {
+    const date = new Date();
+    res.send(`<p>Phonebook has info for ${count} people</p><p>${date}</p>`);
+  });
+});
 // app.post("/api/persons", (req, res) => {
 //   const body = req.body;
 //   if (!body.name || !body.number) {
@@ -182,7 +189,7 @@ const errorHandler = (error, req, res, next) => {
     return res.status(400).send({ error: "malformatted id" });
   }
   next(error);
-}
+};
 
 app.use(errorHandler);
 
