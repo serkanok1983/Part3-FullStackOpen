@@ -93,6 +93,54 @@ app.delete("/api/persons/:id", (req, res, next) => {
     });
 });
 
+app.post("/api/persons", (req, res, next) => {
+  const body = req.body;
+
+  if (!body.name || !body.number) {
+    return res.status(400).json({
+      error: "name or number is missing",
+    });
+  }
+
+  Person.findOne({ name: body.name }).then((existingPerson) => {
+    if (existingPerson) {
+      Person.findByIdAndUpdate(
+        existingPerson._id,
+        { number: body.number },
+        { new: true, runValidators: true, context: 'query' }
+      )
+        .then((updatedPerson) => {
+          res.json(updatedPerson);
+        })
+        .catch((error) => next(error));
+    } else {
+      const person = new Person({
+        name: body.name,
+        number: body.number,
+      });
+
+      person
+        .save()
+        .then((savedPerson) => {
+          res.json(savedPerson);
+        })
+        .catch((error) => next(error));
+    }
+  });
+});
+app.put("/api/persons/:id", (req, res, next) => {
+  const body = req.body;
+  const person = {
+    name: body.name,
+    number: body.number,
+  };
+  Person.findByIdAndUpdate(req.params.id, person, { new: true })
+    .then((updatedPerson) => {
+      res.json(updatedPerson);
+    })
+    .catch((error) => next(error));
+});
+
 // app.post("/api/persons", (req, res) => {
 //   const body = req.body;
 //   if (!body.name || !body.number) {
@@ -114,19 +162,19 @@ app.delete("/api/persons/:id", (req, res, next) => {
 //   res.json(person);
 // });
 
-app.post("/api/persons", (req, res) => {
-  const body = req.body;
-  if (body.content === undefined) {
-    return res.status(400).json({ error: "content missing" });
-  }
-  const person = new Person({
-    name: body.name,
-    number: body.number,
-  });
-  person.save().then((savedPerson) => {
-    res.json(savedPerson);
-  });
-});
+// app.post("/api/persons", (req, res) => {
+//   const body = req.body;
+//   if (body.content === undefined) {
+//     return res.status(400).json({ error: "content missing" });
+//   }
+//   const person = new Person({
+//     name: body.name,
+//     number: body.number,
+//   });
+//   person.save().then((savedPerson) => {
+//     res.json(savedPerson);
+//   });
+// });
 
 const errorHandler = (error, req, res, next) => {
   console.error(error.message);
