@@ -102,6 +102,13 @@ app.post("/api/persons", (req, res, next) => {
     });
   }
 
+  const phoneNumberPattern = /^\d{2,3}-\d{5,}$/;
+  if (!phoneNumberPattern.test(body.number)) {
+    return res.status(400).json({
+      error: "invalid phone number format",
+    });
+  }
+
   Person.findOne({ name: body.name }).then((existingPerson) => {
     if (existingPerson) {
       Person.findByIdAndUpdate(
